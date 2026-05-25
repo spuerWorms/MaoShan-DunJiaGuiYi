@@ -1,0 +1,699 @@
+/* ========================================================================
+ * mobile-responsive.css - 移动端响应式样式增强
+ * ========================================================================
+ * 
+ * 【修改目的】
+ * 为「遁甲归一」项目提供完整的移动端响应式支持，确保在不同尺寸的移动设备
+ *（iOS/Android 各主流机型）上都能获得良好的用户体验。
+ * 
+ * 【实现逻辑】
+ * 1. 采用 Mobile-First 策略，基础样式适配最窄屏幕，通过 min-width 逐步增强
+ * 2. 设置 3 个关键断点：360px（小屏手机）、480px（标准手机）、768px（平板）
+ * 3. 新增的移动端专用样式与原 index.html 内联样式完全分离，互不干扰
+ * 4. 所有移动端新增样式在此统一管理，方便后续维护和迭代
+ * 
+ * 【注意事项】
+ * - 本文件必须在 index.html 的 <style> 标签之后引入，确保层叠优先级
+ * - 原 index.html 内的 @media (max-width: 650px) 规则保留不变，本文件新增的
+ *   规则通过 specificity 提升自然覆盖或补充
+ * - 不要在 index.html 中直接修改任何现有样式，保持原始代码完整性
+ * 
+ * 【断点定义】
+ * 断点名称      | 范围              | 目标设备
+ * --------------|-------------------|----------------------------------
+ * mobile-xs     | 0 - 359px        | 小屏手机 (iPhone SE, Galaxy A 系列)
+ * mobile-sm     | 360px - 479px    | 标准手机 (iPhone 13/14, 主流 Android)
+ * mobile-md     | 480px - 767px    | 大屏手机/小平板 (iPhone Plus/Max)
+ * tablet        | 768px 及以上      | 平板及以上 (iPad, 桌面端)
+ * 
+ * 【版本记录】
+ * v1.0 (2026-05-23) - 初始版本，完整移动端适配
+ * 
+ * ======================================================================== */
+
+
+/* ====================================================================
+ * 【通用移动端基础样式】
+ * 目的：修复移动端常见问题，确保全局一致性
+ * 逻辑：使用 Mobile-First 策略，先定义最小屏幕的默认样式
+ * 注意：这些规则会覆盖原样式中的固定值，但不会影响桌面端显示
+ * ==================================================================== */
+
+/* 
+ * 修复 iOS Safari 的 100vh 问题
+ * 在 iOS 上，100vh 包含地址栏高度，导致页面底部被遮挡
+ * 使用 dvh (dynamic viewport height) 作为更好的替代
+ */
+body {
+    min-height: 100dvh; /* 动态视口高度，自动适配移动端地址栏 */
+    padding: 10px;      /* 移动端减少外边距，扩大内容区域 */
+    font-size: 14px;    /* 移动端基础字号减小，适应小屏幕 */
+    -webkit-text-size-adjust: 100%;  /* 防止 iOS 自动缩放字体 */
+    -webkit-tap-highlight-color: transparent;  /* 移除移动端点击高亮 */
+    touch-action: manipulation;  /* 禁用双击缩放，提升触控响应速度 */
+    -webkit-font-smoothing: antialiased;  /* iOS 字体抗锯齿 */
+    -moz-osx-font-smoothing: grayscale;   /* macOS 字体抗锯齿 */
+}
+
+/*
+ * 容器内边距优化
+ * 原样式 padding: 30px，移动端改为 15px 以节省空间
+ */
+.container {
+    padding: 15px;
+    border-radius: 8px;  /* 移动端圆角略小 */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7), 0 0 8px var(--accent-color-darker) inset;
+}
+
+/* 
+ * 标题字号阶梯缩放
+ * 原 h1: 3em，移动端逐步缩小以适应不同屏幕
+ */
+h1 {
+    font-size: 1.8em;   /* 移动端默认标题大小 */
+}
+
+h2 {
+    font-size: 1.1em;   /* 副标题相应缩小 */
+}
+
+header {
+    margin-bottom: 20px;  /* 移动端减少标题下方间距 */
+    padding-bottom: 15px;
+}
+
+
+/* ====================================================================
+ * 【触控交互优化】
+ * 目的：确保所有可交互元素满足最小触控区域要求
+ * 逻辑：遵循 Google Material Design 48dp 触控区域规范
+ * 注意：使用 min-height/min-width 而非固定值，保持弹性布局
+ * ==================================================================== */
+
+/*
+ * 视图切换按钮触控优化
+ * 增加按钮高度，确保拇指操作舒适
+ */
+.view-toggle button {
+    min-height: 48px;     /* Material Design 最小触控区域 */
+    padding: 10px 8px;    /* 移动端减少水平内边距 */
+    font-size: 1em;       /* 按钮字号适配 */
+    -webkit-user-select: none;  /* 防止长按选中文本 */
+    user-select: none;
+}
+
+/*
+ * 所有按钮的触控区域优化
+ * 确保按钮有足够大的点击范围
+ */
+.controls button,
+.calendar-controls button,
+#qimen-btn,
+#cal-prev-month,
+#cal-next-month,
+#cal-today,
+#cal-go-btn {
+    min-height: 48px;     /* 满足 48dp 触控规范 */
+    min-width: 48px;      /* 确保窄按钮也有足够点击区域 */
+    padding: 10px 15px;   /* 移动端适当缩小内边距 */
+    font-size: 0.95em;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;  /* 禁用双击缩放，提升响应速度 */
+}
+
+/*
+ * 移动端 hover 效果禁用
+ * 移动端没有 hover 状态，避免误触效果
+ */
+.controls button:hover,
+.calendar-controls button:hover {
+    transform: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+/*
+ * 移动端 active 效果增强
+ * 提供明确的触摸反馈
+ */
+.controls button:active,
+.calendar-controls button:active,
+.view-toggle button:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    opacity: 0.85;
+}
+
+/*
+ * 单选按钮区域优化
+ * 增加 label 的点击范围
+ */
+.radio-group label {
+    padding: 10px 12px;   /* 增加内边距扩大点击区域 */
+    min-height: 44px;     /* 确保触控舒适 */
+    display: inline-flex;
+    align-items: center;
+}
+
+/*
+ * 输入框触控优化
+ * 确保输入框有足够大的触摸目标
+ */
+.controls input[type="datetime-local"],
+.calendar-controls input[type="number"] {
+    min-height: 48px;     /* 触控友好 */
+    font-size: 16px !important;  /* !important 防止 iOS 自动缩放输入框 */
+    padding: 10px 12px;
+    box-sizing: border-box;
+    -webkit-appearance: none;  /* 移除 iOS 默认样式 */
+}
+
+
+/* ====================================================================
+ * 【日历视图移动端适配】
+ * 目的：在小屏幕上优化日历的显示和交互体验
+ * 逻辑：压缩单元格高度，精简信息展示，增强可点击性
+ * 注意：保留原始桌面端样式不变，通过媒体查询覆盖移动端样式
+ * ==================================================================== */
+
+/*
+ * 日历表格移动端优化
+ * 减小单元格高度，调整字体大小
+ */
+.calendar-table td {
+    height: 70px;       /* 原 100px，移动端压缩高度 */
+    padding: 4px;       /* 减少内边距 */
+    font-size: 0.85em;
+    cursor: pointer;    /* 移动端显示指针，提示可点击 */
+    -webkit-tap-highlight-color: rgba(230, 162, 60, 0.2);  /* 点击反馈高亮 */
+}
+
+/*
+ * 日历表头移动端适配
+ */
+.calendar-table th {
+    padding: 8px 3px;   /* 移动端缩小表头内边距 */
+    font-size: 1em;
+}
+
+/*
+ * 日期数字字号调整
+ */
+.cal-day-gregorian {
+    font-size: 1.2em;   /* 原 1.4em，移动端略小 */
+}
+
+/*
+ * 月相图标移动端适配
+ */
+.moon-icon {
+    width: 14px !important;   /* 原 18px，移动端缩小 */
+    height: 14px !important;
+    margin-right: 3px !important;
+}
+
+/*
+ * 日历头部信息移动端适配
+ */
+.calendar-header {
+    flex-direction: column;  /* 移动端标题堆叠显示 */
+}
+
+.cal-header-left,
+.cal-header-right {
+    width: 100% !important;  /* 移动端全宽 */
+    padding: 10px 8px;
+    font-size: 1.1em;
+}
+
+.cal-header-left {
+    border-right: none !important;  /* 移除分割线 */
+    border-bottom: 1px solid var(--border-color);
+}
+
+/*
+ * 日历控制栏移动端优化
+ * 紧凑排列，减少间距
+ */
+.calendar-controls {
+    gap: 8px;           /* 原 15px，移动端缩小间距 */
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.calendar-controls input[type="number"] {
+    width: 70px !important;   /* 移动端缩小输入框 */
+    padding: 8px 6px;
+}
+
+/*
+ * 日历摘要容器移动端适配
+ * 移动端堆叠显示，缩小内边距
+ */
+#calendar-summary-container {
+    flex-direction: column;
+    font-size: 0.95em;
+}
+
+.summary-column {
+    width: 100%;
+    padding: 12px;
+}
+
+#summary-left {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+}
+
+
+/* ====================================================================
+ * 【排盘结果移动端适配】
+ * 目的：优化奇门排盘结果在移动端的显示效果
+ * 逻辑：缩小字号，增加横向滚动提示，优化文字动画效果
+ * 注意：保留原始桌面端的 pre 格式输出
+ * ==================================================================== */
+
+/*
+ * 排盘结果容器移动端优化
+ */
+#result-container {
+    padding: 15px;      /* 原 25px，移动端缩小 */
+    min-height: 150px;  /* 移动端降低最小高度 */
+}
+
+/*
+ * 排盘文字字号调整
+ */
+.text-chart {
+    font-size: 0.9em;   /* 原 1.15em，移动端缩小 */
+    line-height: 1.5;
+    overflow-x: auto;   /* 确保可以横向滚动 */
+    -webkit-overflow-scrolling: touch;  /* iOS 平滑滚动 */
+}
+
+/*
+ * 古诗词容器移动端适配
+ */
+#result-container .ancient-text-container {
+    font-size: 1em;     /* 原 1.1em */
+    line-height: 1.8;   /* 原 2.0，移动端收紧行高 */
+}
+
+
+/* ====================================================================
+ * 【模态框移动端适配】
+ * 目的：确保模态框在小屏幕上正常显示和操作
+ * 逻辑：减小内边距，调整关闭按钮尺寸，优化滚动体验
+ * 注意：保留原有的点击背景关闭功能
+ * ==================================================================== */
+
+/*
+ * 模态框移动端优化
+ */
+#day-modal {
+    width: 95%;         /* 移动端接近全宽 */
+    max-width: none;    /* 移除最大宽度限制 */
+    padding: 12px;      /* 原 16px，移动端缩小 */
+    margin: 10px;       /* 增加外边距防止贴边 */
+    max-height: 90vh;   /* 限制最大高度 */
+}
+
+/*
+ * 模态框关闭按钮触控优化
+ */
+#day-modal-close {
+    min-height: 44px;   /* 触控友好 */
+    min-width: 44px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+}
+
+/*
+ * 模态框内容区移动端优化
+ */
+#day-modal-body {
+    max-height: 70vh;   /* 移动端限制内容高度 */
+    -webkit-overflow-scrolling: touch;  /* iOS 平滑滚动 */
+    font-size: 0.9em;
+}
+
+
+/* ====================================================================
+ * 【横屏适配】
+ * 目的：设备旋转时提供最佳布局
+ * 逻辑：检测横屏状态，调整布局以适应横向空间
+ * 注意：横屏模式下高度受限，优先保证内容可见性
+ * ==================================================================== */
+
+@media (orientation: landscape) and (max-height: 500px) {
+    /*
+     * 横屏低高度设备适配
+     * 常见场景：手机横屏使用
+     */
+    body {
+        padding: 5px;
+        align-items: flex-start;  /* 内容靠上排列，避免底部被遮挡 */
+    }
+    
+    .container {
+        padding: 10px;
+        max-height: 95vh;
+        overflow-y: auto;  /* 允许纵向滚动 */
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    header {
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+    
+    h1 {
+        font-size: 1.4em;  /* 横屏进一步缩小标题 */
+    }
+    
+    h2 {
+        font-size: 0.95em;
+    }
+    
+    /*
+     * 横屏模式下日历单元格更紧凑
+     */
+    .calendar-table td {
+        height: 50px;
+        font-size: 0.8em;
+    }
+}
+
+
+/* ====================================================================
+ * 【iOS 安全区域适配】
+ * 目的：适配 iPhone X 及以上机型的刘海屏和安全区域
+ * 逻辑：使用 env() 函数增加安全区域边距
+ * 注意：仅在支持安全区域的设备上生效
+ * ==================================================================== */
+
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+    }
+    
+    .container {
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+}
+
+
+/* ====================================================================
+ * 【打印样式】
+ * 目的：优化移动端打印效果
+ * 逻辑：打印时隐藏不必要的元素，调整对比度
+ * ==================================================================== */
+
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+    
+    .container {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+    
+    .view-toggle,
+    .controls,
+    .calendar-controls {
+        display: none;
+    }
+}
+
+
+/* ====================================================================
+ * 【调试辅助样式】（开发时可用，生产环境可删除）
+ * 目的：可视化显示当前断点，方便开发调试
+ * 逻辑：在 body 上添加伪元素显示当前断点名称
+ * ==================================================================== */
+
+/* 注释掉调试代码，需要时取消注释 */
+/*
+body::after {
+    content: 'mobile-xs';
+    position: fixed;
+    top: 0;
+    right: 0;
+    background: rgba(255, 0, 0, 0.7);
+    color: white;
+    padding: 2px 8px;
+    font-size: 10px;
+    z-index: 9999;
+}
+
+@media (min-width: 360px) {
+    body::after { content: 'mobile-sm'; background: rgba(255, 165, 0, 0.7); }
+}
+
+@media (min-width: 480px) {
+    body::after { content: 'mobile-md'; background: rgba(0, 128, 0, 0.7); }
+}
+
+@media (min-width: 768px) {
+    body::after { content: 'tablet'; background: rgba(0, 0, 255, 0.7); }
+}
+*/
+
+
+/* ====================================================================
+ * 【标准手机端增强样式】(360px 及以上)
+ * 目的：为标准尺寸手机提供更好的体验
+ * 逻辑：在 mobile-xs 基础上适当放宽布局
+ * ==================================================================== */
+
+@media (min-width: 360px) {
+    /*
+     * 标准手机：适当增大标题
+     */
+    h1 {
+        font-size: 2em;
+    }
+    
+    h2 {
+        font-size: 1.15em;
+    }
+    
+    .container {
+        padding: 18px;
+    }
+    
+    /*
+     * 日历单元格高度适当增加
+     */
+    .calendar-table td {
+        height: 80px;
+    }
+    
+    .cal-day-gregorian {
+        font-size: 1.3em;
+    }
+}
+
+
+/* ====================================================================
+ * 【大屏手机/小平板增强样式】(480px 及以上)
+ * 目的：为较大屏幕提供更好的信息密度
+ * 逻辑：逐步恢复桌面端的部分样式
+ * ==================================================================== */
+
+@media (min-width: 480px) {
+    /*
+     * 大屏手机：进一步增大标题
+     */
+    h1 {
+        font-size: 2.2em;
+    }
+    
+    h2 {
+        font-size: 1.2em;
+    }
+    
+    .container {
+        padding: 20px;
+        border-radius: 10px;
+    }
+    
+    header {
+        margin-bottom: 25px;
+        padding-bottom: 18px;
+    }
+    
+    /*
+     * 日历头部恢复横向排列
+     */
+    .calendar-header {
+        flex-direction: row;
+    }
+    
+    .cal-header-left {
+        width: 30% !important;
+        border-right: 1px solid var(--border-color) !important;
+        border-bottom: none !important;
+    }
+    
+    .cal-header-right {
+        width: 70% !important;
+    }
+    
+    /*
+     * 日历单元格进一步增高
+     */
+    .calendar-table td {
+        height: 90px;
+        padding: 6px;
+    }
+    
+    .moon-icon {
+        width: 16px !important;
+        height: 16px !important;
+    }
+    
+    /*
+     * 摘要容器恢复横向布局（覆盖原 650px 规则）
+     */
+    #calendar-summary-container {
+        flex-direction: row;
+    }
+    
+    .summary-column {
+        width: 50%;
+        padding: 15px;
+    }
+    
+    #summary-left {
+        border-right: 1px solid var(--border-color);
+        border-bottom: none;
+    }
+    
+    /*
+     * 排盘结果字号恢复
+     */
+    .text-chart {
+        font-size: 1em;
+    }
+    
+    /*
+     * 输入框宽度恢复
+     */
+    .calendar-controls input[type="number"] {
+        width: auto !important;
+    }
+}
+
+
+/* ====================================================================
+ * 【平板及以上设备样式】(768px 及以上)
+ * 目的：在平板上提供接近桌面端的体验
+ * 逻辑：大部分样式接近桌面端，保留移动端优化
+ * ==================================================================== */
+
+@media (min-width: 768px) {
+    /*
+     * 平板：接近桌面端的标题大小
+     */
+    h1 {
+        font-size: 2.5em;
+    }
+    
+    h2 {
+        font-size: 1.25em;
+    }
+    
+    .container {
+        padding: 25px;
+        border-radius: 12px;
+    }
+    
+    header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+    }
+    
+    /*
+     * 日历单元格高度接近桌面端
+     */
+    .calendar-table td {
+        height: 95px;
+        padding: 8px;
+    }
+    
+    .cal-day-gregorian {
+        font-size: 1.35em;
+    }
+    
+    .moon-icon {
+        width: 17px !important;
+        height: 17px !important;
+        margin-right: 5px !important;
+    }
+    
+    /*
+     * 排盘结果字号恢复桌面端
+     */
+    .text-chart {
+        font-size: 1.1em;
+    }
+    
+    #result-container {
+        padding: 20px;
+        min-height: 180px;
+    }
+    
+    /*
+     * 模态框恢复最大宽度限制
+     */
+    #day-modal {
+        max-width: 720px;
+    }
+}
+
+
+/* ====================================================================
+ * 【超大屏幕适配】(1024px 及以上)
+ * 目的：在桌面端保持原始设计
+ * 逻辑：完全恢复原始样式参数
+ * ==================================================================== */
+
+@media (min-width: 1024px) {
+    body {
+        padding: 20px;
+        font-size: 16px;
+    }
+    
+    .container {
+        padding: 30px;
+    }
+    
+    h1 {
+        font-size: 3em;
+    }
+    
+    h2 {
+        font-size: 1.3em;
+    }
+    
+    .calendar-table td {
+        height: 100px;
+        padding: 8px;
+    }
+    
+    .text-chart {
+        font-size: 1.15em;
+    }
+    
+    #result-container {
+        padding: 25px;
+        min-height: 200px;
+    }
+}
