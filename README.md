@@ -26,7 +26,6 @@
 
 ### 样式与工具
 * `mobile-responsive.css`：移动端响应式样式文件（Mobile-First 策略，独立于原始样式）。
-* `responsive-logger.js`：开发调试用断点监听与日志记录工具（生产环境已禁用）。
 
 ### 脚本与文档
 * `optimize_qimen_interpreter.py`：解析器规则优化与生成脚本。

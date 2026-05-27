@@ -120,6 +120,7 @@
         white-space: pre; font-family: monospace; line-height: 1.6;
         font-size: 1.15em; text-align: left; color: var(--header-color);
         text-shadow: 0 0 5px rgba(220, 200, 150, 0.3);
+        margin: 0; padding: 0;
     }
 
     /* === 【V21】独创文字样式 (位于 result-container 内部) === */
@@ -5131,35 +5132,78 @@ const infoText = [
     `　　　${info.nextTerm}`  // <--- 第 2 处修改：新增一行，用全角空格对齐
 ].join('\n');
         
-        const cellWidth = 10; 
-        const hLinePart = '-'.repeat(cellWidth);
-        const hL = `${hLinePart}+${hLinePart}+${hLinePart}`;
-        const vL = '|'; 
-
         const formatPalace = (pNum) => {
             const pData = pan[pNum]; 
-            const pad = (str, len) => { let s = str || ''; let dL=0; for(let i=0;i<s.length;i++){dL+=(s.charCodeAt(i)>255)?2:1;} const p=len-dL; return s+' '.repeat(p>0?p:0); };
-            const center = (str, len) => { let s = str || ''; let dL=0; for(let i=0;i<s.length;i++){dL+=(s.charCodeAt(i)>255)?2:1;} const p=len-dL; if(p<=0)return s; const l=Math.floor(p/2); const r=p-l; return ' '.repeat(l)+s+' '.repeat(r);};
-            if(info.chartType === 'zhuanpan' && pNum === 5) { const e = pData?pData.diPan:''; return {top:' '.repeat(cellWidth), bottom:center(e,cellWidth)};}
-            if(!pData || (!pData.god && pNum !== 5 && info.chartType !== 'zhuanpan')) { return {top:' '.repeat(cellWidth), bottom:' '.repeat(cellWidth)};}
-            const god = pData.godAbbr || ' '; const heaven = pData.tianPan || ' '; const earth = pData.diPan || ' ';
-            const star = pData.starAbbr || ' '; const door = pData.doorAbbr || ' ';
-            const topStr = `${god} ${heaven}`; 
-            const bottomStr = `${earth} ${star} ${door}`;
-            return {top: pad(topStr, cellWidth), bottom: pad(bottomStr, cellWidth)};
+            if(info.chartType === 'zhuanpan' && pNum === 5) { 
+                const e = pData?pData.diPan:''; 
+                return `<div class="cell-grid">
+                    <div class="cell-row"><span class="cell-item"></span><span class="cell-item"></span><span class="cell-item"></span></div>
+                    <div class="cell-row"><span class="cell-item"></span><span class="cell-item">${e || ''}</span><span class="cell-item"></span></div>
+                </div>`;
+            }
+            if(!pData || (!pData.god && pNum !== 5 && info.chartType !== 'zhuanpan')) { 
+                return `<div class="cell-grid">
+                    <div class="cell-row"><span class="cell-item"></span><span class="cell-item"></span><span class="cell-item"></span></div>
+                    <div class="cell-row"><span class="cell-item"></span><span class="cell-item"></span><span class="cell-item"></span></div>
+                </div>`;
+            }
+            const god = pData.godAbbr || ' '; 
+            const earth = pData.diPan || ' ';
+            const door = pData.doorAbbr || ' ';
+            
+            const heavenMatch = (pData.tianPan || '').match(/^([^\(\（]+)(?:[\(\（](.+?)[\)\）])?$/);
+            const heaven = heavenMatch ? heavenMatch[1] : ' ';
+            const heaven2 = heavenMatch && heavenMatch[2] ? heavenMatch[2] : '';
+            const hasDoubleHeaven = heaven2 && heaven2 !== '';
+            const heavenText = hasDoubleHeaven ? `${heaven} ${heaven2}` : heaven;
+            
+            const starAbbr = pData.starAbbr || '';
+            let star = starAbbr;
+            let star2 = '';
+            if (starAbbr.length === 2 && starAbbr[1] === '禽') {
+                star = starAbbr[0];
+                star2 = '禽';
+            }
+            const hasDoubleStar = star2 && star2 !== '';
+            const starText = hasDoubleStar ? `${star} ${star2}` : star;
+            
+            return `<div class="cell-grid">
+                <div class="cell-row"><span class="cell-item">${god}</span><span class="cell-item">${heavenText}</span><span class="cell-item"></span></div>
+                <div class="cell-row"><span class="cell-item">${earth}</span><span class="cell-item">${starText}</span><span class="cell-item">${door}</span></div>
+            </div>`;
         };
         
         const p4=formatPalace(4), p9=formatPalace(9), p2=formatPalace(2); 
         const p3=formatPalace(3), p5=formatPalace(5), p7=formatPalace(7);
         const p8=formatPalace(8), p1=formatPalace(1), p6=formatPalace(6); 
         
-        const chartText = [
-            `${p4.top}${vL}${p9.top}${vL}${p2.top}`, `${p4.bottom}${vL}${p9.bottom}${vL}${p2.bottom}`, hL,
-            `${p3.top}${vL}${p5.top}${vL}${p7.top}`, `${p3.bottom}${vL}${p5.bottom}${vL}${p7.bottom}`, hL,
-            `${p8.top}${vL}${p1.top}${vL}${p6.top}`, `${p8.bottom}${vL}${p1.bottom}${vL}${p6.bottom}`
-        ].join('\n');
+        const chartHtml = `
+            <style>
+                .qimen-grid-wrapper { width: 100%; max-width: 270px; margin: 0; }
+                .qimen-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; aspect-ratio: 1/1; outline: 0.5px solid var(--header-color); }
+                .qimen-cell { padding: 2px; display: flex; align-items: center; justify-content: center; border-right: 0.5px solid var(--header-color); border-bottom: 0.5px solid var(--header-color); }
+                .qimen-cell:nth-child(3n) { border-right: none; }
+                .qimen-cell:nth-last-child(-n+3) { border-bottom: none; }
+                .cell-grid { display: grid; grid-template-rows: 1fr 1fr; width: 100%; height: 100%; }
+                .cell-row { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+                .cell-item { display: flex; align-items: center; justify-content: center; font-size: 1em; line-height: 1.3; white-space: nowrap; color: var(--header-color); }
+            </style>
+            <div class="qimen-grid-wrapper">
+                <div class="qimen-grid">
+                    <div class="qimen-cell">${p4}</div>
+                    <div class="qimen-cell">${p9}</div>
+                    <div class="qimen-cell">${p2}</div>
+                    <div class="qimen-cell">${p3}</div>
+                    <div class="qimen-cell">${p5}</div>
+                    <div class="qimen-cell">${p7}</div>
+                    <div class="qimen-cell">${p8}</div>
+                    <div class="qimen-cell">${p1}</div>
+                    <div class="qimen-cell">${p6}</div>
+                </div>
+            </div>
+        `;
         
-        resultContainer.innerHTML = `<pre class="text-chart">${infoText}\n\n${chartText}</pre>`;
+        resultContainer.innerHTML = `<pre class="text-chart">${infoText}\n\n</pre>${chartHtml}`;
     }
 
     qimenBtn.addEventListener('click', () => {
@@ -5168,7 +5212,7 @@ const infoText = [
         if (ancientTextReplaceTimeout) clearTimeout(ancientTextReplaceTimeout);
         
         try {
-            const date = datetimeInput.value ? new Date(datetimeInput.value) : new Date();
+            const date = new Date();
             const chartType = document.querySelector('input[name="chart-type"]:checked').value;
             const lunarString = getLunarString(date);
             const chart = DunJia.createQiMenChart(date, chartType);
