@@ -30,7 +30,7 @@
         width: 100%;
         max-width: 800px;
         background-color: var(--container-bg);
-        border: 1px solid var(--border-color);
+        border: 1px solid var(--header-color);
         border-radius: 12px;
         padding: 30px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px var(--accent-color-darker) inset;
@@ -115,6 +115,43 @@
         border-radius: 8px; border: 1px solid var(--border-color);
         min-height: 200px; overflow-x: auto;
         box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+        position: relative;
+    }
+    #qimen-chart-area {
+        width: 100%;
+    }
+    #qimen-detail-panel {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 350px;
+        height: 425px;
+        background-color: var(--container-bg);
+        border-radius: 12px;
+        border: 1px solid var(--header-color);
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        display: none;
+        z-index: 10;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        opacity: 0;
+        transform: translateX(20px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #qimen-detail-panel::-webkit-scrollbar {
+        display: none;
+    }
+    #qimen-detail-panel.active {
+        display: block;
+        opacity: 1;
+        transform: translateX(0);
+    }
+    #qimen-detail-content {
+        color: var(--primary-color);
+        font-size: 1em;
+        line-height: 1.8;
     }
     .text-chart {
         white-space: pre; font-family: monospace; line-height: 1.6;
@@ -369,12 +406,19 @@
         </div>
         
         <div id="result-container">
-            <div class="ancient-text-container">
-                <p>文明星火曜万年，上古先民刻阴阳；</p>
-                <p>太一北斗九星在，十干万古永世存；</p>
-                <p>洛书九宫廿八宿，时空分二又合一；</p>
-                <p>阴阳定局二十四，旬首符头引路人；</p>
-                <p>八九神遁河图中，后天璇玑心中藏。</p>
+            <div id="qimen-chart-area">
+                <div class="ancient-text-container">
+                    <p>文明星火曜万年，上古先民刻阴阳；</p>
+                    <p>太一北斗九星在，十干万古永世存；</p>
+                    <p>洛书九宫廿八宿，时空分二又合一；</p>
+                    <p>阴阳定局二十四，旬首符头引路人；</p>
+                    <p>八九神遁河图中，后天璇玑心中藏。</p>
+                </div>
+            </div>
+            <div id="qimen-detail-panel">
+                <div id="qimen-detail-content">
+                    点击九宫格单元格查看详情
+                </div>
             </div>
         </div>
         
@@ -5122,6 +5166,7 @@ module.exports = { XL, obb, JD, dt_T, J2000, pi2, rad, nutB, Lunar };
     // 【V21 修复】: 修复日空 bug
     function renderQiMenChart(chartData, lunarStr) {
         const { info, pan } = chartData;
+        currentPanData = pan;
         
        // 【V21 修复】: 修正 "日空" 间距 和 重复的 "空" 字
 const infoText = [
@@ -5179,9 +5224,10 @@ const infoText = [
         
         const chartHtml = `
             <style>
-                .qimen-grid-wrapper { width: 100%; max-width: 270px; margin: 0; }
+                .qimen-grid-wrapper { width: 100%; max-width: 270px; margin: 0 0 0 40px; }
                 .qimen-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; aspect-ratio: 1/1; outline: 0.5px solid var(--header-color); }
-                .qimen-cell { padding: 2px; display: flex; align-items: center; justify-content: center; border-right: 0.5px solid var(--header-color); border-bottom: 0.5px solid var(--header-color); }
+                .qimen-cell { padding: 2px; display: flex; align-items: center; justify-content: center; border-right: 0.5px solid var(--header-color); border-bottom: 0.5px solid var(--header-color); cursor: pointer; transition: background-color 0.2s; }
+                .qimen-cell:hover { background-color: rgba(230, 162, 60, 0.15); }
                 .qimen-cell:nth-child(3n) { border-right: none; }
                 .qimen-cell:nth-last-child(-n+3) { border-bottom: none; }
                 .cell-grid { display: grid; grid-template-rows: 1fr 1fr; width: 100%; height: 100%; }
@@ -5190,21 +5236,217 @@ const infoText = [
             </style>
             <div class="qimen-grid-wrapper">
                 <div class="qimen-grid">
-                    <div class="qimen-cell">${p4}</div>
-                    <div class="qimen-cell">${p9}</div>
-                    <div class="qimen-cell">${p2}</div>
-                    <div class="qimen-cell">${p3}</div>
-                    <div class="qimen-cell">${p5}</div>
-                    <div class="qimen-cell">${p7}</div>
-                    <div class="qimen-cell">${p8}</div>
-                    <div class="qimen-cell">${p1}</div>
-                    <div class="qimen-cell">${p6}</div>
+                    <div class="qimen-cell" data-palace="4" onclick="handlePalaceClick(4)">${p4}</div>
+                    <div class="qimen-cell" data-palace="9" onclick="handlePalaceClick(9)">${p9}</div>
+                    <div class="qimen-cell" data-palace="2" onclick="handlePalaceClick(2)">${p2}</div>
+                    <div class="qimen-cell" data-palace="3" onclick="handlePalaceClick(3)">${p3}</div>
+                    <div class="qimen-cell" data-palace="5" onclick="handlePalaceClick(5)">${p5}</div>
+                    <div class="qimen-cell" data-palace="7" onclick="handlePalaceClick(7)">${p7}</div>
+                    <div class="qimen-cell" data-palace="8" onclick="handlePalaceClick(8)">${p8}</div>
+                    <div class="qimen-cell" data-palace="1" onclick="handlePalaceClick(1)">${p1}</div>
+                    <div class="qimen-cell" data-palace="6" onclick="handlePalaceClick(6)">${p6}</div>
                 </div>
             </div>
         `;
         
-        resultContainer.innerHTML = `<pre class="text-chart">${infoText}\n\n</pre>${chartHtml}`;
+        const chartArea = document.getElementById('qimen-chart-area');
+        if (chartArea) {
+            chartArea.innerHTML = `<pre class="text-chart">${infoText}\n\n</pre>${chartHtml}`;
+        } else {
+            resultContainer.innerHTML = `<pre class="text-chart">${infoText}\n\n</pre>${chartHtml}`;
+        }
     }
+
+    let currentPanData = null;
+
+    window.handlePalaceClick = function(palaceNum) {
+        const detailPanel = document.getElementById('qimen-detail-panel');
+        const detailContent = document.getElementById('qimen-detail-content');
+        
+        let html = '';
+        
+        if (currentPanData && currentPanData[palaceNum]) {
+            const pData = currentPanData[palaceNum];
+            const godFull = pData.god || '';
+            const godAbbr = pData.godAbbr || '';
+            const starFull = pData.star || '';
+            const starAbbr = pData.starAbbr || '';
+            const doorAbbr = pData.doorAbbr || '';
+            const diPan = pData.diPan || '';
+            const tianPanRaw = pData.tianPan || '';
+            
+            const gongMap = { 1: '坎', 2: '坤', 3: '震', 4: '巽', 5: '中', 6: '乾', 7: '兑', 8: '艮', 9: '离' };
+            const gongName = gongMap[palaceNum] || '';
+            if (gongName && window.gongData && window.gongData[gongName]) {
+                html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${gongName}卦</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.gongData[gongName]}</span></div>`;
+            }
+            
+            if (godFull && window.godData && window.godData[godAbbr]) {
+                html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${godFull}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.godData[godAbbr]}</span></div>`;
+            }
+            
+            const starKey = starAbbr.length === 2 && starAbbr[1] === '禽' ? '禽' : starAbbr;
+            if (starKey && window.starData && window.starData[starKey]) {
+                const fullStarName = starKey === '禽' ? '天禽星' : (starFull.replace(/\(禽\)/g, '').endsWith('星') ? starFull.replace(/\(禽\)/g, '') : starFull.replace(/\(禽\)/g, '') + '星');
+                html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${fullStarName}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.starData[starKey]}</span></div>`;
+            }
+            
+            if (starAbbr.length === 2 && starAbbr[1] === '禽' && window.starData) {
+                const mainStarName = starFull.replace(/\(禽\)/g, '');
+                if (mainStarName && mainStarName !== '天禽') {
+                    const mainStarAbbr = mainStarName.replace('天', '');
+                    if (window.starData[mainStarAbbr]) {
+                        const fullMainStarName = mainStarName.endsWith('星') ? mainStarName : mainStarName + '星';
+                        html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${fullMainStarName}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.starData[mainStarAbbr]}</span></div>`;
+                    }
+                }
+            }
+            
+            if (doorAbbr && window.doorData && window.doorData[doorAbbr]) {
+                const doorFullMap = { '休': '休门', '生': '生门', '伤': '伤门', '杜': '杜门', '景': '景门', '死': '死门', '惊': '惊门', '开': '开门' };
+                const doorFull = doorFullMap[doorAbbr] || doorAbbr + '门';
+                html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${doorFull}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.doorData[doorAbbr]}</span></div>`;
+            }
+            
+            const heavenMatch = tianPanRaw.match(/^([^\(\（]+)(?:[\(\（](.+?)[\)\）])?$/);
+            const heaven1 = heavenMatch ? heavenMatch[1].trim() : '';
+            const heaven2 = heavenMatch && heavenMatch[2] ? heavenMatch[2].trim() : '';
+            
+            const shownTiangan = new Set();
+            
+            if (heaven1 && window.tianganData && window.tianganData[heaven1]) {
+                html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${heaven1}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.tianganData[heaven1]}</span></div>`;
+                shownTiangan.add(heaven1);
+            }
+            
+            if (heaven2 && window.tianganData && window.tianganData[heaven2] && !shownTiangan.has(heaven2)) {
+                html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${heaven2}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.tianganData[heaven2]}</span></div>`;
+                shownTiangan.add(heaven2);
+            }
+            
+            if (diPan && window.tianganData && window.tianganData[diPan] && !shownTiangan.has(diPan)) {
+                html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${diPan}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.tianganData[diPan]}</span></div>`;
+                shownTiangan.add(diPan);
+            }
+            
+            if (window.shigankeyingData) {
+                if (heaven1 && diPan) {
+                    const key1 = heaven1 + diPan;
+                    if (window.shigankeyingData[key1]) {
+                        html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${heaven1}</b><span style="color: var(--header-color);">加</span><b style="color: var(--accent-color);">${diPan}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.shigankeyingData[key1]}</span></div>`;
+                    }
+                }
+                if (heaven2 && diPan) {
+                    const key2 = heaven2 + diPan;
+                    if (window.shigankeyingData[key2]) {
+                        html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${heaven2}</b><span style="color: var(--header-color);">加</span><b style="color: var(--accent-color);">${diPan}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.shigankeyingData[key2]}</span></div>`;
+                    }
+                }
+            }
+            
+            const dizhiMap = { 1: ['子'], 2: ['未', '申'], 3: ['卯'], 4: ['辰', '巳'], 5: [], 6: ['戌', '亥'], 7: ['酉'], 8: ['丑', '寅'], 9: ['午'] };
+            const dizhiList = dizhiMap[palaceNum] || [];
+            if (window.dizhiData) {
+                for (const dz of dizhiList) {
+                    if (window.dizhiData[dz]) {
+                        html += `<div style="margin-bottom: 12px;"><b style="color: var(--accent-color);">${dz}</b><span style="color: var(--header-color);">：</span><span style="color: var(--primary-color); line-height: 1.8;">${window.dizhiData[dz]}</span></div>`;
+                    }
+                }
+            }
+        }
+        
+        if (!html) {
+            html = `<p style="color: var(--primary-color);">暂无信息</p>`;
+        }
+        
+        detailPanel.style.display = 'block';
+        detailPanel.scrollTop = 0;
+        detailContent.innerHTML = html;
+        
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                detailPanel.style.opacity = '1';
+                detailPanel.style.transform = 'translateX(0)';
+            });
+        });
+    };
+
+    async function loadGodData() {
+        try {
+            const response = await fetch('data/god.json');
+            window.godData = await response.json();
+        } catch (e) {
+            console.error('加载神盘数据失败:', e);
+            window.godData = {};
+        }
+    }
+    loadGodData();
+
+    async function loadStarData() {
+        try {
+            const response = await fetch('data/star.json');
+            window.starData = await response.json();
+        } catch (e) {
+            console.error('加载星盘数据失败:', e);
+            window.starData = {};
+        }
+    }
+    loadStarData();
+
+    async function loadDoorData() {
+        try {
+            const response = await fetch('data/door.json');
+            window.doorData = await response.json();
+        } catch (e) {
+            console.error('加载门盘数据失败:', e);
+            window.doorData = {};
+        }
+    }
+    loadDoorData();
+
+    async function loadTianganData() {
+        try {
+            const response = await fetch('data/tiangan.json');
+            window.tianganData = await response.json();
+        } catch (e) {
+            console.error('加载天干数据失败:', e);
+            window.tianganData = {};
+        }
+    }
+    loadTianganData();
+
+    async function loadShigankeyingData() {
+        try {
+            const response = await fetch('data/shigankeying.json');
+            window.shigankeyingData = await response.json();
+        } catch (e) {
+            console.error('加载十干克应数据失败:', e);
+            window.shigankeyingData = {};
+        }
+    }
+    loadShigankeyingData();
+
+    async function loadGongData() {
+        try {
+            const response = await fetch('data/gong.json');
+            window.gongData = await response.json();
+        } catch (e) {
+            console.error('加载宫位数据失败:', e);
+            window.gongData = {};
+        }
+    }
+    loadGongData();
+
+    async function loadDizhiData() {
+        try {
+            const response = await fetch('data/dizhi.json');
+            window.dizhiData = await response.json();
+        } catch (e) {
+            console.error('加载地支数据失败:', e);
+            window.dizhiData = {};
+        }
+    }
+    loadDizhiData();
 
     qimenBtn.addEventListener('click', () => {
         // 【V21 修复】: 立即清除10秒消失的计时器
@@ -5754,38 +5996,6 @@ document.getElementById('day-modal-overlay').addEventListener('click', function(
 });
 </script>
 
-    <!-- ====================================================================
-         响应式断点监听与日志记录系统
-         说明：引入独立的响应式日志JS文件，用于追踪断点切换和样式变化
-         目的：验证移动端响应式样式是否正确生效，帮助开发者调试
-         
-         使用方式：
-         1. 正常访问：日志输出到浏览器控制台（F12 → Console）
-         2. Debug 模式：在 URL 后添加 ?debug=true 显示内嵌日志面板
-            例如：index.html?debug=true
-         
-         日志面板功能：
-         - 实时显示断点切换记录
-         - 追踪 CSS 属性值变化（旧值 → 新值）
-         - 统计断点切换次数和样式变更次数
-         - 支持导出日志为 JSON 文件
-         - 支持清除日志
-         
-         控制台 API（在 F12 Console 中使用）：
-         - ResponsiveLogger.getLogs()           - 获取所有日志
-         - ResponsiveLogger.clearLogs()          - 清除所有日志
-         - ResponsiveLogger.exportLogs()         - 导出日志为 JSON
-         - ResponsiveLogger.togglePanel()        - 切换日志面板显示
-         - ResponsiveLogger.getCurrentBreakpoint() - 获取当前断点名称
-         - ResponsiveLogger.getActiveBreakpoints() - 获取所有激活的断点
-         - ResponsiveLogger.getDeviceInfo()      - 获取设备信息
-         - ResponsiveLogger.getConfig()          - 获取配置信息
-         
-         注意：
-         - 生产环境建议移除此脚本引用以减小文件体积
-         - 此脚本必须在原有脚本之后引入
-         ==================================================================== -->
-    <!-- <script src="responsive-logger.js"></script> -->
 
 </body>
 </html>
