@@ -31,7 +31,7 @@
         max-width: 800px;
         background-color: var(--container-bg);
         border: 1px solid var(--header-color);
-        border-radius: 12px;
+        border-radius: 8px;
         padding: 30px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px var(--accent-color-darker) inset;
     }
@@ -125,12 +125,12 @@
         top: 20px;
         right: 20px;
         width: 350px;
-        height: 425px;
+        height: 420px;
         background-color: var(--container-bg);
-        border-radius: 12px;
+        border-radius: 7px;
         border: 1px solid var(--header-color);
         padding: 20px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--header-color) inset;
         display: none;
         z-index: 10;
         overflow-y: scroll;
@@ -5224,9 +5224,9 @@ const infoText = [
         
         const chartHtml = `
             <style>
-                .qimen-grid-wrapper { width: 100%; max-width: 270px; margin: 0 0 0 40px; }
-                .qimen-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; aspect-ratio: 1/1; outline: 0.5px solid var(--header-color); }
-                .qimen-cell { padding: 2px; display: flex; align-items: center; justify-content: center; border-right: 0.5px solid var(--header-color); border-bottom: 0.5px solid var(--header-color); cursor: pointer; transition: background-color 0.2s; }
+                .qimen-grid-wrapper { width: 100%; max-width: 270px; margin: -5px 0 0 40px; }
+                .qimen-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; aspect-ratio: 1/1; outline: 1px solid var(--header-color); }
+                .qimen-cell { padding: 2px; display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--header-color); border-bottom: 1px solid var(--header-color); cursor: pointer; transition: background-color 0.2s; }
                 .qimen-cell:hover { background-color: rgba(230, 162, 60, 0.15); }
                 .qimen-cell:nth-child(3n) { border-right: none; }
                 .qimen-cell:nth-last-child(-n+3) { border-bottom: none; }
@@ -5363,10 +5363,11 @@ const infoText = [
         detailPanel.scrollTop = 0;
         detailContent.innerHTML = html;
         
+        const isMobile = window.innerWidth <= 767;
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 detailPanel.style.opacity = '1';
-                detailPanel.style.transform = 'translateX(0)';
+                detailPanel.style.transform = isMobile ? 'translateY(0)' : 'translateX(0)';
             });
         });
     };

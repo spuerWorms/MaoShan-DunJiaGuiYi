@@ -387,6 +387,60 @@ header {
 
 
 /* ====================================================================
+ * 【右侧详情面板移动端适配】
+ * 目的：移动端将详情面板改为全屏覆盖式弹窗
+ * 逻辑：小屏设备使用固定定位覆盖整个屏幕，带关闭按钮
+ * ==================================================================== */
+
+@media (max-width: 767px) {
+    #qimen-detail-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        margin: 0;
+        padding: 50px 20px 15px 20px;
+        z-index: 1000;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+    
+    #qimen-detail-panel.active {
+        transform: translateY(0);
+    }
+    
+    #qimen-detail-panel::before {
+        content: '✕';
+        position: absolute;
+        top: 12px;
+        right: 15px;
+        font-size: 1.5em;
+        color: var(--header-color);
+        cursor: pointer;
+        z-index: 1001;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.3);
+    }
+    
+    #qimen-detail-panel::before:hover {
+        background: rgba(0, 0, 0, 0.5);
+    }
+}
+
+
+/* ====================================================================
  * 【iOS 安全区域适配】
  * 目的：适配 iPhone X 及以上机型的刘海屏和安全区域
  * 逻辑：使用 env() 函数增加安全区域边距
